@@ -1,0 +1,22 @@
+# LARAVEL BACKEND (synapse-be)
+/synapse-be/vendor/
+/synapse-be/node_modules/
+/synapse-be/.env
+/synapse-be/storage/*.key
+/synapse-be/public/storage
+/synapse-be/public/hot
+/synapse-be/storage/framework/cache/data/*
+!/synapse-be/storage/framework/cache/data/.gitignore
+/synapse-be/storage/framework/views/*.php
+/synapse-be/storage/framework/sessions/*
+/synapse-be/storage/logs/*.log
+
+# FLUTTER FRONTEND (synapse-fe)
+/synapse-fe/.dart_tool/
+/synapse-fe/.packages
+/synapse-fe/.pub-cache/
+/synapse-fe/.pub/
+/synapse-fe/build/
+/synapse-fe/ios/
+/synapse-fe/.env*
+/synapse-fe/android/
