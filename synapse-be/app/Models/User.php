@@ -21,6 +21,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'nis_nip',
+        'avatar',
     ];
 
     /**
@@ -44,5 +47,17 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // Siswa bisa punya banyak kelas (Many to Many)
+    public function class()
+    {
+        return $this->belongsToMany(ClassRoom::class, 'class_user', 'user_id', 'class_id');
+    }
+
+    // Guru punya banyak ujian yang dibuat
+    public function teacherExams()
+    {
+        return $this->hasMany(Exam::class, 'guru_id');
     }
 }
