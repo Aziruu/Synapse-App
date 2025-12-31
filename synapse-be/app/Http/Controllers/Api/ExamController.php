@@ -14,35 +14,68 @@ use Illuminate\Support\Facades\Auth;
 class ExamController extends Controller
 {
     // Khusus Siswa | Murid
+    public function index(Request $request)
+    {
+        $user = $request->user();
+
+        // Ambil ujian yang tersedia untuk kelas si User
+        $exams = \App\Models\Exam::whereHas('classes', function($q) use ($user) {
+            $q->whereIn('classes.id', $user->classes->pluck('id'));
+        })->get();
+
+        $data = $exams->map(function($exam) use ($user) {
+            // Cari sesi terakhir User di ujian ini
+            $session = \App\Models\ExamSession::where('exam_id', $exam->id)
+                ->where('student_id', $user->id)
+                ->first();
+
+            return [
+                'id' => $exam->id,
+                'title' => $exam->title,
+                'duration' => $exam->duration,
+                'status' => $session ? $session->status : 'belum',
+                'score' => $session ? $session->score : 0,
+            ];
+        });
+
+        return response()->json($data);
+    }
 
     // Masuk Ujian Pakai Token
     public function joinExam(Request $request)
     {
         $request->validate(['token' => 'required']);
 
-        // Cari ujian berdasarkan token
+        // 1. Cari Exam berdasarkan Token
         $exam = Exam::where('token', $request->token)->first();
 
         if (!$exam) {
-            return response()->json(['message' => 'Token ujian tidak valid.'], 404);
+            return response()->json(['message' => 'Maaf, Token MTK123 tidak ditemukan!'], 404);
         }
 
-        // Cek apakah waktu ujian sudah mulai atau sudah lewat
-        $now = Carbon::now();
-        if ($now->lt($exam->start_time) || $now->gt($exam->end_time)) {
-            return response()->json(['message' => 'Ujian belum dimulai atau sudah berakhir.'], 403);
+        // 2. KELONGGARAN WAKTU (Biar gak error jam)
+        // Kita buat start_time lebih awal 10 menit buat jaga-jaga lag server
+        $startTime = \Carbon\Carbon::parse($exam->start_time)->subMinutes(10);
+        $endTime = \Carbon\Carbon::parse($exam->end_time);
+        $now = now();
+
+        if ($now->lt($startTime) || $now->gt($endTime)) {
+            return response()->json([
+                'message' => 'Ujian belum dimulai atau sudah lewat!',
+                'server_time' => $now->toDateTimeString(),
+                'exam_start' => $startTime->toDateTimeString()
+            ], 403);
         }
 
-        // Buat Sesi Ujian baru buat siswa ini
+        // 3. Buat Sesi
         $session = ExamSession::firstOrCreate([
             'exam_id' => $exam->id,
-            'student_id' => $request->user()->id,
+            'student_id' => \Illuminate\Support\Facades\Auth::id(),
         ], [
             'start_at' => $now,
             'status' => 'progress'
         ]);
 
-        // Kirim data ujian beserta soal-soalnya ke Flutter
         return response()->json([
             'status' => 'success',
             'exam' => $exam->load('soals'),
@@ -56,7 +89,7 @@ class ExamController extends Controller
     public function report($exam_id)
     {
         $exam = Exam::with('sessions.user')->findOrFail($exam_id);
-        
+
         if ($exam->guru_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
@@ -69,7 +102,7 @@ class ExamController extends Controller
         $request->validate([
             'session_id' => 'required|exists:exam_sessions,id',
             'soal_id'    => 'required|exists:bank_soals,id',
-            'answer_text'=> 'required',
+            'answer_text' => 'required',
         ]);
 
         $soal = BankSoal::findOrFail($request->soal_id);
@@ -94,8 +127,8 @@ class ExamController extends Controller
                     $isCorrect = true;
                     $points = 10;
                 }
-            } 
-            
+            }
+
             // B. Cek Keyword (Jika tidak lolos cek mtk atau soal non-angka)
             if (!$isCorrect && $soal->keywords) {
                 $matchedKeywords = 0;
@@ -104,12 +137,12 @@ class ExamController extends Controller
                         $matchedKeywords++;
                     }
                 }
-                
+
                 // Hitung poin berdasarkan persentase keyword yang ada
                 $totalKeywords = count($soal->keywords);
                 if ($totalKeywords > 0) {
                     $points = ($matchedKeywords / $totalKeywords) * 10;
-                    if ($points > 0) $isCorrect = true; 
+                    if ($points > 0) $isCorrect = true;
                 }
             }
         }
@@ -135,5 +168,88 @@ class ExamController extends Controller
             'points_earned' => $points,
             'current_total_score' => $totalScore
         ]);
+    }
+
+    public function getSoals($ulangan_id)
+    {
+        $exam = \App\Models\Exam::with('soals')->find($ulangan_id);
+
+        if (!$exam) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Jadwal ujian ID ' . $ulangan_id . ' tidak ditemukan'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $exam->soals
+        ]);
+    }
+
+    public function submitUjian(Request $request, $ulangan_id)
+    {
+        try {
+            $request->validate(['jawaban' => 'required|array']);
+
+            // 1. Cari Sesi
+            $session = \App\Models\ExamSession::where('exam_id', $ulangan_id)
+                ->where('student_id', \Illuminate\Support\Facades\Auth::id())
+                ->where('status', 'progress')
+                ->latest()
+                ->first();
+
+            if (!$session) {
+                return response()->json(['status' => 'error', 'message' => 'Sesi tidak ditemukan!'], 400);
+            }
+
+            $totalScore = 0;
+            $jawabanSiswa = $request->jawaban;
+
+            foreach ($jawabanSiswa as $soalId => $textJawaban) {
+                $soal = \App\Models\BankSoal::find($soalId);
+                if (!$soal) continue;
+
+                $isCorrect = false;
+                $points = 0;
+
+                if ($soal->type === 'pg') {
+                    if (strtolower(trim($textJawaban)) === strtolower(trim($soal->correct_answer))) {
+                        $isCorrect = true;
+                        $points = 50; 
+                    }
+                } else {
+                    // Gunakan optional chaining atau null coalescing biar gak crash kalau tolerance kosong
+                    $tolerance = (float)($soal->tolerance ?? 0);
+                    if (is_numeric($textJawaban) && abs((float)$textJawaban - (float)$soal->correct_answer) <= $tolerance) {
+                        $isCorrect = true;
+                        $points = 50;
+                    }
+                }
+
+                $totalScore += $points;
+
+                \App\Models\Answer::updateOrCreate(
+                    ['session_id' => $session->id, 'soal_id' => $soalId],
+                    ['answer_text' => $textJawaban, 'is_correct' => $isCorrect, 'points' => $points]
+                );
+            }
+
+            $session->update([
+                'score' => $totalScore,
+                'status' => 'finished',
+                'finished_at' => now()
+            ]);
+
+            return response()->json(['status' => 'success', 'message' => 'Ujian Berhasil!']);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Aduh Azil, Laravel bilang: ' . $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 500);
+        }
     }
 }

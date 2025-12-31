@@ -51,9 +51,9 @@ class User extends Authenticatable
     }
 
     // Siswa bisa punya banyak kelas (Many to Many)
-    public function class()
+    public function classes()
     {
-        return $this->belongsToMany(ClassRoom::class, 'class_user', 'user_id', 'class_id');
+        return $this->belongsToMany(ClassRoom::class, 'class_user', 'student_id', 'class_id');
     }
 
     // Guru punya banyak ujian yang dibuat
