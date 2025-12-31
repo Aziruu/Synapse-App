@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:synapse_app/features/screens/main_screen.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/session_manager.dart';
-import '../screens/dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -32,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => DashboardScreen(userData: result['user']),
+              builder: (context) => MainScreen(userData: result['user']),
             ),
           );
         }
