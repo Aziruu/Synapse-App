@@ -12,7 +12,7 @@ Route::get('/', function () {
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('classes', ClassRoomController::class);
-    // Route::resource('subjects', SubjectController::class);
+    Route::resource('subjects', SubjectController::class);
     // Route::resource('bank-soals', BankSoalController::class);
     // Route::resource('exams', ExamController::class);
 });
