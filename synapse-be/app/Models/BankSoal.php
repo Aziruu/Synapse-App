@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class BankSoal extends Model {
     protected $table = 'bank_soals';
-    protected $fillable = ['guru_id', 'subject_id', 'question_text', 'type', 'options', 'correct_answer', 'keywords', 'tolerance'];
+    protected $fillable = ['guru_id', 'subject_id', 'question_text', 'question_image', 'type', 'options', 'correct_answer', 'keywords', 'tolerance'];
 
     protected $casts = [
         'options' => 'array',

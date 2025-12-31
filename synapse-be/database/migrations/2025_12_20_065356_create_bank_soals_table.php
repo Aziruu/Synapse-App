@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('guru_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('subject_id')->constrained('subjects')->onDelete('cascade');
             $table->text('question_text');
+            $table->string('question_image')->nullable()->after('question_text');
             $table->enum('type', ['pg', 'essay']);
             
             // Simpan opsi PG dalam JSON: {"a": "Isi", "b": "Isi", ...}

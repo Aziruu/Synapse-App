@@ -59,7 +59,7 @@ class ClassRoomController extends Controller
         $request->validate(['class_name' => 'required|unique:classes,class_name,' . $id]);
         $class = \App\Models\ClassRoom::findOrFail($id);
         $class->update($request->all());
-        return back()->with('success', 'Kelas berhasil diubah!');
+        return redirect()->route('admin.classes.index')->with('success', 'Kelas berhasil diubah!');
     }
 
     /**

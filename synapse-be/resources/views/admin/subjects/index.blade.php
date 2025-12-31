@@ -3,68 +3,74 @@
 @section('content')
 <div class="page-header">
     <h3 class="page-title"> Kelola Mata Pelajaran </h3>
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalTambah">
+    {{-- FIX: Ganti tombol modal jadi link ke halaman create --}}
+    <a href="{{ route('admin.subjects.create') }}" class="btn btn-primary">
         <i class="mdi mdi-plus"></i> Tambah Mapel
-    </button>
+    </a>
 </div>
 
-<div class="card">
-    <div class="card-body">
-        <h4 class="card-title">Daftar Mapel</h4>
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Nama Mata Pelajaran</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($subjects as $s)
-                    <tr>
-                        <td>{{ $s->subject_name }}</td>
-                        <td>
-                            <button class="btn btn-warning btn-sm text-white" data-toggle="modal" data-target="#modalEdit{{ $s->id }}">Edit</button>
-                            <form action="{{ route('admin.subjects.destroy', $s->id) }}" method="POST" class="d-inline">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
-                            </form>
-                        </td>
-                    </tr>
-
-                    <div class="modal fade" id="modalEdit{{ $s->id }}" tabindex="-1">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <form action="{{ route('admin.subjects.update', $s->id) }}" method="POST">
-                                    @csrf @method('PUT')
-                                    <div class="modal-header"><h5 class="modal-title">Edit Mapel</h5></div>
-                                    <div class="modal-body">
-                                        <input type="text" name="subject_name" class="form-control" value="{{ $s->subject_name }}" required>
-                                    </div>
-                                    <div class="modal-footer"><button type="submit" class="btn btn-success">Update</button></div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="modalTambah" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form action="{{ route('admin.subjects.store') }}" method="POST">
-                @csrf
-                <div class="modal-header"><h5 class="modal-title">Tambah Mapel Baru</h5></div>
-                <div class="modal-body">
-                    <input type="text" name="subject_name" class="form-control" placeholder="Misal: Matematika" required>
+<div class="row">
+    {{-- FIX: Gunakan col-12 biar gak kepotong di pojok --}}
+    <div class="col-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Daftar Mapel</h4>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nama Mata Pelajaran</th>
+                                <th width="200px">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($subjects as $s)
+                            <tr>
+                                <td>{{ $s->subject_name }}</td>
+                                <td>
+                                    {{-- FIX: Link ke halaman edit --}}
+                                    <a href="{{ route('admin.subjects.edit', $s->id) }}" class="btn btn-warning btn-sm text-white mr-2">
+                                        <i class="mdi mdi-pencil"></i> Edit
+                                    </a>
+                                    
+                                    {{-- Form Hapus dengan SweetAlert --}}
+                                    <form action="{{ route('admin.subjects.destroy', $s->id) }}" method="POST" class="d-inline delete-form">
+                                        @csrf @method('DELETE')
+                                        <button type="button" class="btn btn-danger btn-sm btn-delete">
+                                            <i class="mdi mdi-trash-can"></i> Hapus
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-                <div class="modal-footer"><button type="submit" class="btn btn-primary">Simpan</button></div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    {{-- Logika SweetAlert biar hapus data makin pro --}}
+    $(document).on('click', '.btn-delete', function(e) {
+        let form = $(this).closest('form');
+        Swal.fire({
+            title: 'Hapus Mata Pelajaran?',
+            text: "Data soal yang pakai mapel ini mungkin ikut terpengaruh!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
+</script>
 @endsection

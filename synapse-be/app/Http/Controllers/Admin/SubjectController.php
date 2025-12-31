@@ -21,7 +21,7 @@ class SubjectController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.subjects.create');
     }
 
     /**
@@ -47,7 +47,8 @@ class SubjectController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $subject = \App\Models\Subject::findOrFail($id);
+        return view('admin.subjects.edit', compact('subject'));
     }
 
     /**
