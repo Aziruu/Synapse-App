@@ -5,7 +5,9 @@ import '../../core/services/api_service.dart';
 import '../../core/services/session_manager.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final VoidCallback onBackToHome;
+
+  const ProfileScreen({super.key, required this.onBackToHome});
 
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
@@ -14,7 +16,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   Map<String, dynamic>? user;
   bool _isLoading = true;
-  
+
   // Ambil dark-gray yang kamu kasih tadi
   final Color darkGray = const Color(0xFF46494D);
 
@@ -42,22 +44,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        title: Text("Konfirmasi Keluar", style: GoogleFonts.fredoka(fontWeight: FontWeight.bold, color: darkGray)),
-        content: Text("Apakah kamu yakin ingin keluar dari akun Synapse?", style: GoogleFonts.fredoka(color: darkGray)),
+        title: Text(
+          "Konfirmasi Keluar",
+          style: GoogleFonts.fredoka(
+            fontWeight: FontWeight.bold,
+            color: darkGray,
+          ),
+        ),
+        content: Text(
+          "Apakah kamu yakin ingin keluar dari akun Synapse?",
+          style: GoogleFonts.fredoka(color: darkGray),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text("Batal", style: GoogleFonts.fredoka(color: AppColors.grey)),
+            child: Text(
+              "Batal",
+              style: GoogleFonts.fredoka(color: AppColors.grey),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
             onPressed: () async {
               await SessionManager().removeToken();
+
               if (mounted) {
-                Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+                //Tutup dialognya dulu (biar bersih)
+                Navigator.of(context, rootNavigator: true).pop();
+
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/login',
+                  (route) => false,
+                );
               }
             },
-            child: Text("Keluar", style: GoogleFonts.fredoka(color: AppColors.white)),
+            child: Text(
+              "Keluar",
+              style: GoogleFonts.fredoka(color: AppColors.white),
+            ),
           ),
         ],
       ),
@@ -68,62 +93,83 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: _isLoading 
-        ? const Center(child: CircularProgressIndicator(color: AppColors.secondaryLight))
-        : SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25),
-              child: Column(
-                children: [
-                  const SizedBox(height: 60),
-                  // HEADER SECTION
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.arrow_back_ios_new, color: darkGray, size: 20),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      Expanded(
-                        child: Text(
-                          "Profile",
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.fredoka(fontSize: 22, fontWeight: FontWeight.w600, color: darkGray),
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.secondaryLight),
+            )
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 25),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 60),
+                    // HEADER SECTION
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            Icons.arrow_back_ios_new,
+                            color: darkGray,
+                            size: 20,
+                          ),
+                          onPressed: widget.onBackToHome,
                         ),
-                      ),
-                      const SizedBox(width: 40),
-                    ],
-                  ),
-                  const SizedBox(height: 40),
-                  
-                  // LOGIKA FOTO PROFIL
-                  _buildAvatar(),
-                  
-                  const SizedBox(height: 20),
-                  Text(
-                    user?['name'] ?? "User Empty",
-                    style: GoogleFonts.fredoka(fontSize: 24, fontWeight: FontWeight.bold, color: darkGray),
-                  ),
-                  const SizedBox(height: 10),
-                  _buildUserTag(),
-                  const SizedBox(height: 50),
+                        Expanded(
+                          child: Text(
+                            "Profile",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.fredoka(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w600,
+                              color: darkGray,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 40),
+                      ],
+                    ),
+                    const SizedBox(height: 40),
 
-                  // MENU BUTTONS
-                  _buildProfileButton("Info Detail", AppColors.white, darkGray),
-                  const SizedBox(height: 15),
-                  _buildProfileButton("Lupa Password?", AppColors.white, darkGray),
-                  const SizedBox(height: 15),
-                  _buildProfileButton("Sign Out", const Color(0xFFFF3B3B), AppColors.white, isLogout: true),
-                ],
+                    // LOGIKA FOTO PROFIL
+                    _buildAvatar(),
+
+                    const SizedBox(height: 20),
+                    Text(
+                      user?['name'] ?? "User Empty",
+                      style: GoogleFonts.fredoka(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: darkGray,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    _buildUserTag(),
+                    const SizedBox(height: 50),
+
+                    // MENU BUTTONS
+                    _buildProfileButton(
+                      "Info Detail",
+                      AppColors.white,
+                      darkGray,
+                    ),
+                    const SizedBox(height: 15),
+                    _buildProfileButton(
+                      "Sign Out",
+                      const Color(0xFFFF3B3B),
+                      AppColors.white,
+                      isLogout: true,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
     );
   }
 
   Widget _buildAvatar() {
     // Cek apakah ada data avatar di database
     final String? avatarUrl = user?['avatar'];
-    
+
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
@@ -134,7 +180,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: AppColors.white,
         backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
             ? NetworkImage(avatarUrl) // Jika ada di DB
-            : const AssetImage('assets/images/default_profile.png') as ImageProvider, // Fallback
+            : const AssetImage('assets/images/avatar.png')
+                  as ImageProvider, // Fallback
       ),
     );
   }
@@ -144,20 +191,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          user?['classes']?.isNotEmpty == true ? user!['classes'][0]['class_name'] : "12 RPL 1",
-          style: GoogleFonts.fredoka(fontSize: 18, fontWeight: FontWeight.w600, color: darkGray.withOpacity(0.7)),
+          user?['classes']?.isNotEmpty == true
+              ? user!['classes'][0]['class_name']
+              : "Tidak Ada Kelas",
+          style: GoogleFonts.fredoka(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: darkGray.withOpacity(0.7),
+          ),
         ),
         const SizedBox(width: 10),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          decoration: BoxDecoration(color: AppColors.secondaryLight, borderRadius: BorderRadius.circular(20)),
-          child: Text("Siswa", style: GoogleFonts.fredoka(color: AppColors.white, fontSize: 12)),
+          decoration: BoxDecoration(
+            color: AppColors.secondaryLight,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            "Siswa",
+            style: GoogleFonts.fredoka(color: AppColors.white, fontSize: 12),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildProfileButton(String label, Color bgColor, Color textColor, {bool isLogout = false}) {
+  Widget _buildProfileButton(
+    String label,
+    Color bgColor,
+    Color textColor, {
+    bool isLogout = false,
+  }) {
     return SizedBox(
       width: double.infinity,
       height: 65,
@@ -165,14 +229,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: bgColor,
           elevation: isLogout ? 0 : 1,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
         ),
-        onPressed: isLogout ? _showLogoutConfirmation : () {
-          // Navigasi ke page info/password nanti
-        },
+        onPressed: isLogout
+            ? _showLogoutConfirmation
+            : () {
+                // Navigasi ke page info/password nanti
+              },
         child: Text(
           label,
-          style: GoogleFonts.fredoka(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
+          style: GoogleFonts.fredoka(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: textColor,
+          ),
         ),
       ),
     );

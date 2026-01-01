@@ -1,12 +1,14 @@
 class Soal {
   final int id;
   final String pertanyaan;
+  final String? imageSoal;
   final List<String> pilihan;
   final String type;
 
   Soal({
     required this.id,
     required this.pertanyaan,
+    this.imageSoal,
     required this.pilihan,
     required this.type,
   });
@@ -22,6 +24,7 @@ class Soal {
     return Soal(
       id: (json['id'] as num).toInt(),
       pertanyaan: json['question_text']?.toString() ?? '',
+      imageSoal: json['question_image'],
       type: json['type'] ?? 'pg',
       pilihan: listPilihan,
     );

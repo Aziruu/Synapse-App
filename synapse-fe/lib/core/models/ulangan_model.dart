@@ -16,16 +16,16 @@ class Ulangan {
     required this.status,
     required this.imageAsset,
   });
-}
 
-List<Ulangan> listUlangan = [
-  Ulangan(
-    id: 1,
-    mapel: "Matematika",
-    guru: "Budi Santoso, S.Pd",
-    jam: "08:00 - 09:30",
-    durasi: "90 Menit",
-    status: "mulai",
-    imageAsset: "assets/images/math_cover.png",
-  ),
-];
+  factory Ulangan.fromJson(Map<String, dynamic> json) {
+    return Ulangan(
+      id: json['id'],
+      mapel: json['subject_name'] ?? 'Mapel Tidak Diketahui', 
+      guru: json['guru_name'] ?? 'Anonim',
+      jam: "${json['start_time']} - ${json['end_time']}", 
+      durasi: "${json['duration']} Menit",
+      status: json['status'] ?? 'pending',
+      imageAsset: json['cover_image'] ?? 'assets/images/default_cover.png',
+    );
+  }
+}

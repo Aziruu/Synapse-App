@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:synapse_app/shared/theme/app_colors.dart';
 import '../../core/models/jadwal_model.dart';
-import 'package:synapse_app/features/screens/ulangan_screen.dart';
+import '../../core/models/pembiasaan_model.dart';
 
 bool isTimePast(String endTimeStr) {
   final now = DateTime.now();
@@ -20,14 +20,31 @@ bool isTimePast(String endTimeStr) {
 
 class DashboardScreen extends StatelessWidget {
   final Map<String, dynamic> userData;
+  final VoidCallback onProfileTap;
+  final VoidCallback onUlanganTap;
+  final VoidCallback onJadwalTap;
+  final VoidCallback onPembiasaanTap;
 
-  const DashboardScreen({super.key, required this.userData});
+  const DashboardScreen({
+    super.key,
+    required this.userData,
+    required this.onProfileTap,
+    required this.onUlanganTap,
+    required this.onJadwalTap,
+    required this.onPembiasaanTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     final int hariIni = DateTime.now().weekday;
+
+  final pembiasaanHariIni = masterPembiasaan.firstWhere(
+    (p) => p.hari == hariIni,
+    orElse: () => masterPembiasaan[0],
+  );
+
     final jadwalAktif = masterJadwal
-        .where((j) => j.hari == hariIni && !isTimePast(j.jamSelesai))
+        .where((j) => j.hari == hariIni)
         .toList();
 
     return Scaffold(
@@ -40,24 +57,25 @@ class DashboardScreen extends StatelessWidget {
             children: [
               _buildHeader(context),
               _buildSectionTitle("Pembiasaan"),
-              _buildBanner(
-                hariIni == 1 ? "Senin, Upacara Bendera" : "Literasi Pagi",
+              GestureDetector(
+                onTap: onPembiasaanTap,
+                child: _buildBanner(
+                  "${pembiasaanHariIni.judul}: ${pembiasaanHariIni.deskripsi}",
+                  pembiasaanHariIni.imageAsset,
+                ),
               ),
               const SizedBox(height: 25),
               _buildSectionTitle("Ulangan"),
               GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => UlanganScreen()),
-                  );
-                },
-                child:
-                    _buildBannerUlangan(), // Pake banner atau card yang kamu desain
+                onTap: onUlanganTap,
+                child: _buildBannerUlangan(),
               ),
               const SizedBox(height: 25),
               _buildSectionTitle("Jadwal Pelajaran"),
-              ...jadwalAktif.map((j) => _buildJadwalCard(j)).toList(),
+              ...jadwalAktif.map((j) => GestureDetector(
+                onTap: onJadwalTap,
+                child:  _buildJadwalCard(j)
+                )).toList(),
               const SizedBox(height: 30),
             ],
           ),
@@ -75,10 +93,10 @@ class DashboardScreen extends StatelessWidget {
     final String className =
         (userData['classes'] != null && userData['classes'].isNotEmpty)
         ? userData['classes'][0]['class_name']
-        : "Belum Ada Kelas"; // Fallback kalau datanya kosong
+        : "Belum Ada Kelas";
 
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, '/profile'),
+      onTap: onProfileTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 25),
         child: Row(
@@ -169,50 +187,61 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBanner(String text) {
+  Widget _buildBanner(String text, String imagePath) {
     return Container(
       width: double.infinity,
-      height: 160,
+      height: 180,
       decoration: BoxDecoration(
-        color: const Color(0xFF4DFED1),
-        borderRadius: BorderRadius.circular(8),
+        color: Colors.grey.shade300,
+        borderRadius: BorderRadius.circular(15),
       ),
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.4),
-            borderRadius: const BorderRadius.vertical(
-              bottom: Radius.circular(8),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(15),
+        child: Stack(
+          children: [
+            // GAMBAR BANNER
+            Image.asset(
+              imagePath,
+              width: double.infinity,
+              height: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (context, e, s) => Container(color: Colors.grey.shade300),
             ),
-          ),
-          child: Text(
-            text,
-            style: GoogleFonts.fredoka(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
+            // OVERLAY TEKS TEAL
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                width: double.infinity,
+                color: const Color(0xFF4DFED1).withOpacity(0.9),
+                child: Text(
+                  text,
+                  style: GoogleFonts.fredoka(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildBannerUlangan() {
-    return Container(
-      width: double.infinity,
-      height: 80,
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Center(
-        child: Text(
-          "Klik untuk melihat daftar ulangan",
-          style: GoogleFonts.fredoka(color: Colors.grey, fontSize: 12),
-        ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(15),
+      child: Image.asset(
+        'assets/images/banner_ulangan.png',
+        width: double.infinity,
+        height: 100,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            width: double.infinity,
+            height: 100,
+            color: Colors.grey.shade300,
+            child: const Center(child: Icon(Icons.image, color: Colors.grey)),
+          );
+        },
       ),
     );
   }

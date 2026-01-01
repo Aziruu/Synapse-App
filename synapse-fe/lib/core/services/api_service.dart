@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/soal_model.dart';
+import '../constants.dart';
 import 'session_manager.dart';
 
 class ApiService {
-  static const String baseUrl = 'https://crack-hawk-humbly.ngrok-free.app/api';
+  static String baseUrl = ApiConfig.baseUrl;
 
   //  Fungsi Login
   Future<Map<String, dynamic>> login(String email, String password) async {

@@ -93,15 +93,15 @@ class _UjianPageState extends State<UjianPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               backgroundColor: Colors.green,
-              content: Text("Selamat! Ujian kamu sudah terkirim ke Laravel. ✨"),
+              content: Text("Selamat! Ujian kamu sudah terkirim"),
             ),
           );
         } else {
-          // JIKA GAGAL (StatusCode bukan 200): Kasih tahu Azil!
+          // JIKA GAGAL (StatusCode bukan 200)
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               backgroundColor: Colors.redAccent,
-              content: Text("Gagal mengirim: Cek Log Laravel atau Ngrok kamu!"),
+              content: Text("Gagal mengirim Ujian"),
             ),
           );
         }

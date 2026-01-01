@@ -41,7 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar( SnackBar(content: Text("Login Gagal!")));
+        ).showSnackBar(SnackBar(content: Text("Login Gagal!")));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -97,8 +97,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       // Email Field
                       _buildInputField(
-                        label: "Email / NIS :",
-                        hint: "0071120312",
+                        label: "Email :",
+                        hint: "akun@email.com",
                         controller: _emailController,
                         icon: Icons.person,
                       ),
@@ -146,72 +146,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 15),
-
-                      // Forgot Password
-                      Text(
-                        "Forgot your password?",
-                        style: GoogleFonts.fredoka(
-                          color: const Color(0xFF4DFED1),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
                     ],
                   ),
                 ),
-
-                const SizedBox(height: 30),
-                Text(
-                  "Or",
-                  style: GoogleFonts.fredoka(
-                    color: Colors.grey,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                //  Google Pill Button
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 40),
-                  width: double.infinity,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(50),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset('assets/images/google_logo.png', height: 100),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 30),
-                // Sign Up Row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Don't have an account? ",
-                      style: GoogleFonts.fredoka(
-                        color: Colors.grey,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Text(
-                      "Sign up",
-                      style: GoogleFonts.fredoka(
-                        color: const Color(0xFF4DFED1),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 50),
               ],
             ),
           ),

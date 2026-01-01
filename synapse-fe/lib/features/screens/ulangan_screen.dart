@@ -6,6 +6,10 @@ import 'ujian_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class UlanganScreen extends StatefulWidget {
+  final VoidCallback onBackToHome;
+
+  const UlanganScreen({super.key, required this.onBackToHome});
+
   @override
   _UlanganScreenState createState() => _UlanganScreenState();
 }
@@ -95,7 +99,7 @@ class _UlanganScreenState extends State<UlanganScreen> {
                   color: Colors.white,
                   size: 22,
                 ),
-                onPressed: () => Navigator.pop(context),
+                onPressed: widget.onBackToHome,
               ),
             ),
           ),
