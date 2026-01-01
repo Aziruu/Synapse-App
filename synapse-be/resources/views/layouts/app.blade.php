@@ -56,6 +56,12 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{{ route('admin.teachers.index') }}">
+                            <span class="menu-title">Data Guru</span>
+                            <i class="mdi mdi-account-multiple menu-icon"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="{{ route('admin.bank-soals.index') }}">
                             <span class="menu-title">Bank Soal</span>
                             <i class="mdi mdi-account-multiple menu-icon"></i>
