@@ -41,3 +41,30 @@
     </div>
 </div>
 @endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('click', function (e) {
+        if (e.target && e.target.classList.contains('btn-delete')) {
+            e.preventDefault();
+            const form = e.target.closest('form');
+            
+            Swal.fire({
+                title: 'Hapus Kelas?',
+                text: "Siswa di kelas ini bakal kehilangan datanya, lho!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Pakai native submit biar langsung tembus ke controller
+                    form.submit(); 
+                }
+            });
+        }
+    });
+</script>
+@endsection

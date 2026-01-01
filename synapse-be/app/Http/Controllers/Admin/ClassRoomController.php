@@ -31,7 +31,7 @@ class ClassRoomController extends Controller
     {
         $request->validate(['class_name' => 'required|unique:classes']);
         \App\Models\ClassRoom::create($request->all());
-        return back()->with('success', 'Kelas berhasil ditambah!');
+        return redirect()->route('admin.classes.index')->with('success', 'Data masuk! 🚀');
     }
 
     /**
@@ -68,6 +68,6 @@ class ClassRoomController extends Controller
     public function destroy($id)
     {
         \App\Models\ClassRoom::destroy($id);
-        return back()->with('success', 'Kelas berhasil dihapus!');
+        return redirect()->route('admin.classes.index')->with('success', 'Kelas berhasil dihapus!');
     }
 }

@@ -1,6 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
+@if ($errors->any())
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Aduh, cek lagi:</strong>
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 <div class="page-header">
     <h3 class="page-title"> Tambah Siswa Baru </h3>
     <a href="{{ route('admin.users.index') }}" class="btn btn-light">Kembali</a>
@@ -19,6 +29,10 @@
                     <div class="form-group">
                         <label for="email">Email</label>
                         <input type="email" name="email" class="form-control" id="email" placeholder="email@synapse.id" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nis_nip">NIS / NIP</label>
+                        <input type="nis_nip" name="nis_nip" class="form-control" id="nis_nip" placeholder="22445677" required>
                     </div>
                     <div class="form-group">
                         <label for="password">Password (Default: 123)</label>

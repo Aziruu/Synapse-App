@@ -1,6 +1,19 @@
 @extends('layouts.app')
 
 @section('content')
+
+{{-- Menampilkan error validasi --}}
+@if ($errors->any())
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Aduh, cek lagi:</strong>
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 <div class="page-header">
     <h3 class="page-title"> Konfigurasi Ujian Baru </h3>
     <a href="{{ route('admin.exams.index') }}" class="btn btn-light">Batal</a>
@@ -20,7 +33,8 @@
                     </div>
                     <div class="form-group">
                         <label>Mata Pelajaran</label>
-                        <select name="subject_id" class="form-control" required>
+                        {{-- FIX: Tambah ID agar sinkron dengan JS --}}
+                        <select name="subject_id" id="subject_select" class="form-control" required>
                             @foreach($subjects as $s)
                                 <option value="{{ $s->id }}">{{ $s->subject_name }}</option>
                             @endforeach
@@ -53,13 +67,14 @@
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title">Pilih Kelas</h4>
+                    <p class="text-muted small">Centang kelas yang akan mengikuti ujian ini.</p>
                     <div class="form-group">
                         @foreach($classes as $c)
-                        <div class="form-check">
-                            <label class="form-check-label text-muted">
+                        <div class="form-check form-check-flat form-check-primary">
+                            <label class="form-check-label">
                                 <input type="checkbox" name="class_ids[]" value="{{ $c->id }}" class="form-check-input"> 
                                 {{ $c->class_name }} 
-                            </label>
+                            <i class="input-helper"></i></label>
                         </div>
                         @endforeach
                     </div>
@@ -72,6 +87,7 @@
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title">Pilih Soal dari Bank Soal</h4>
+                    <p class="text-muted small">Soal otomatis difilter berdasarkan Mapel yang kamu pilih.</p>
                     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                         <table class="table table-bordered">
                             <thead>
@@ -83,9 +99,10 @@
                             </thead>
                             <tbody>
                                 @foreach($bankSoals as $soal)
-                                <tr>
+                                {{-- FIX: Tambah class dan data-subject untuk filter JS --}}
+                                <tr class="soal-row" data-subject="{{ $soal->subject_id }}">
                                     <td class="text-center">
-                                        <input type="checkbox" name="soal_ids[]" value="{{ $soal->id }}">
+                                        <input type="checkbox" name="soal_ids[]" value="{{ $soal->id }}" class="soal-checkbox">
                                     </td>
                                     <td><span class="badge badge-outline-secondary">{{ strtoupper($soal->type) }}</span></td>
                                     <td>{{ Str::limit($soal->question_text, 100) }}</td>
@@ -102,4 +119,32 @@
         </div>
     </div>
 </form>
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const subjectSelect = document.getElementById('subject_select');
+    const soalRows = document.querySelectorAll('.soal-row');
+
+    function filterSoal() {
+        const selectedSubject = subjectSelect.value;
+        soalRows.forEach(row => {
+            // Tampilkan hanya soal yang ID Mapelnya sama dengan pilihan
+            if (row.getAttribute('data-subject') === selectedSubject) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+                // Uncheck soal yang disembunyikan agar tidak terkirim secara tidak sengaja
+                const checkbox = row.querySelector('.soal-checkbox');
+                if(checkbox) checkbox.checked = false;
+            }
+        });
+    }
+
+    // Jalankan saat halaman load & saat Mapel diganti
+    subjectSelect.addEventListener('change', filterSoal);
+    filterSoal(); 
+});
+</script>
 @endsection

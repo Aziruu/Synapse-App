@@ -35,7 +35,8 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:3',
-            'class_id' => 'required'
+            'class_id' => 'required',
+            'nis_nip' => 'required'
         ]);
 
         // Buat User baru
@@ -50,7 +51,7 @@ class UserController extends Controller
         // Hubungkan ke kelas lewat tabel pivot class_user
         $user->classes()->attach($request->class_id);
 
-        return back()->with('success', 'Siswa berhasil ditambahkan!');
+        return redirect()->route('admin.users.index')->with('success', 'Siswa berhasil ditambahkan!');
     }
 
     /**

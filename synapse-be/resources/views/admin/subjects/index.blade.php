@@ -54,23 +54,27 @@
 
 @section('scripts')
 <script>
-    {{-- Logika SweetAlert biar hapus data makin pro --}}
-    $(document).on('click', '.btn-delete', function(e) {
-        let form = $(this).closest('form');
-        Swal.fire({
-            title: 'Hapus Mata Pelajaran?',
-            text: "Data soal yang pakai mapel ini mungkin ikut terpengaruh!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                form.submit();
-            }
-        });
+    document.addEventListener('click', function (e) {
+        if (e.target && e.target.classList.contains('btn-delete')) {
+            e.preventDefault();
+            const form = e.target.closest('form');
+            
+            Swal.fire({
+                title: 'Hapus Mapel?',
+                text: "Mapel ini bakal kehilangan datanya, lho!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Pakai native submit biar langsung tembus ke controller
+                    form.submit(); 
+                }
+            });
+        }
     });
 </script>
 @endsection

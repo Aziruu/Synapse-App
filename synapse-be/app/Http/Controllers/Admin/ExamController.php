@@ -30,7 +30,7 @@ class ExamController extends Controller
     {
         $subjects = Subject::all();
         $classes = ClassRoom::all();
-        $bankSoals = BankSoal::all(); 
+        $bankSoals = BankSoal::all();
         return view('admin.exams.create', compact('subjects', 'classes', 'bankSoals'));
     }
 
@@ -51,7 +51,7 @@ class ExamController extends Controller
 
         // 1. Simpan Data Utama Ujian
         $exam = Exam::create([
-            'guru_id' => Auth::id(),
+            'guru_id' => Auth::id() ?? 1,
             'subject_id' => $request->subject_id,
             'title' => $request->title,
             'start_time' => $request->start_time,
@@ -84,7 +84,12 @@ class ExamController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $exam = Exam::with(['classes', 'soals'])->findOrFail($id);
+        $subjects = Subject::all();
+        $classes = ClassRoom::all();
+        $bankSoals = BankSoal::all();
+
+        return view('admin.exams.edit', compact('exam', 'subjects', 'classes', 'bankSoals'));
     }
 
     /**
@@ -92,7 +97,32 @@ class ExamController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'subject_id' => 'required',
+            'title' => 'required',
+            'start_time' => 'required',
+            'end_time' => 'required|after:start_time',
+            'duration' => 'required|integer',
+            'class_ids' => 'required|array',
+            'soal_ids' => 'required|array',
+        ]);
+
+        $exam = Exam::findOrFail($id);
+
+        //  Update data utama
+        $exam->update($request->except(['class_ids', 'soal_ids']));
+
+        // Sync Kelas (otomatis hapus yang lama, pasang yang baru)
+        $exam->classes()->sync($request->class_ids);
+
+        //  Sync Soal dengan Pivot Order
+        $soalData = [];
+        foreach ($request->soal_ids as $index => $soalId) {
+            $soalData[$soalId] = ['order' => $index + 1];
+        }
+        $exam->soals()->sync($soalData);
+
+        return redirect()->route('admin.exams.index')->with('success', 'Konfigurasi ujian berhasil diperbarui! ✨');
     }
 
     /**
@@ -102,6 +132,6 @@ class ExamController extends Controller
     {
         $exam = Exam::findOrFail($id);
         $exam->delete();
-        return back()->with('success', 'Jadwal ujian berhasil dihapus.');
+        return redirect()->route('admin.exams.index')->with('success', 'Jadwal ujian berhasil dihapus.');
     }
 }

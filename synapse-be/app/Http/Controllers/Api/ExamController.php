@@ -246,7 +246,7 @@ class ExamController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Aduh Azil, Laravel bilang: ' . $e->getMessage(),
+                'message' => 'Aduh, Laravel bilang: ' . $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine()
             ], 500);

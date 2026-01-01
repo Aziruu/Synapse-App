@@ -31,7 +31,7 @@ class SubjectController extends Controller
     {
         $request->validate(['subject_name' => 'required|unique:subjects']);
         \App\Models\Subject::create($request->all());
-        return back()->with('success', 'Mata Pelajaran berhasil ditambah!');
+        return redirect()->route('admin.subjects.index')->with('success', 'Data masuk! 🚀');
     }
 
     /**
@@ -59,7 +59,7 @@ class SubjectController extends Controller
         $request->validate(['subject_name' => 'required|unique:subjects,subject_name,' . $id]);
         $subject = \App\Models\Subject::findOrFail($id);
         $subject->update($request->all());
-        return back()->with('success', 'Mata Pelajaran berhasil diubah!');
+        return redirect()->route('admin.subjects.index')->with('success', 'Mata Pelajaran berhasil diubah!');
     }
 
     /**
@@ -68,6 +68,6 @@ class SubjectController extends Controller
     public function destroy(string $id)
     {
         \App\Models\Subject::destroy($id);
-        return back()->with('success', 'Mata Pelajaran berhasil dihapus!');
+        return redirect()->route('admin.subjects.index')->with('success', 'Mata Pelajaran berhasil dihapus!');
     }
 }

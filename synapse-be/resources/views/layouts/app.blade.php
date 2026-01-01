@@ -55,15 +55,18 @@
                             <i class="mdi mdi-account-multiple menu-icon"></i>
                         </a>
                     </li>
-                    {{-- <li class="nav-item">
-                        <a class="nav-link" href="#" id="logout-link">
-                            <span class="menu-title">Logout</span>
-                            <i class="mdi mdi-power menu-icon"></i>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('admin.bank-soals.index') }}">
+                            <span class="menu-title">Bank Soal</span>
+                            <i class="mdi mdi-account-multiple menu-icon"></i>
                         </a>
-                        <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" style="display: none;">
-                            @csrf
-                        </form>
-                    </li> --}}
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('admin.exams.index') }}">
+                            <span class="menu-title">Ulangan</span>
+                            <i class="mdi mdi-account-multiple menu-icon"></i>
+                        </a>
+                    </li>
                 </ul>
             </nav>
 

@@ -43,7 +43,7 @@ class BankSoalController extends Controller
         ]);
 
         $data = $request->all();
-        $data['guru_id'] = Auth::id();
+        $data['guru_id'] = Auth::id() ?? 1;
 
         // Urusan Gambar
         if ($request->hasFile('question_image')) {
@@ -100,6 +100,6 @@ class BankSoalController extends Controller
         if ($soal->question_image) Storage::disk('public')->delete($soal->question_image);
         $soal->delete();
 
-        return back()->with('success', 'Soal dihapus selamanya!');
+        return redirect()->route('admin.bank-soals.index')->with('success', 'Soal dihapus selamanya!');
     }
 }

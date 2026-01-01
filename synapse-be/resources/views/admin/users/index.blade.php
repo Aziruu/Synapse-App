@@ -24,6 +24,7 @@
                     <tr>
                         <th>Nama Siswa</th>
                         <th>Email</th>
+                        <th>NIP / NIS</th>
                         <th>Kelas</th>
                         <th>Aksi</th>
                     </tr>
@@ -33,6 +34,7 @@
                     <tr>
                         <td class="py-1">{{ $u->name }}</td>
                         <td>{{ $u->email }}</td>
+                        <td>{{ $u->nis_nip }}</td>
                         <td>
                             @foreach($u->classes as $c)
                                 <label class="badge badge-gradient-info">{{ $c->class_name }}</label>
@@ -66,23 +68,27 @@
 
 @section('scripts')
 <script>
-    // Logika SweetAlert buat tombol hapus
-    $(document).on('click', '.btn-delete', function(e) {
-        let form = $(this).closest('form');
-        Swal.fire({
-            title: 'Hapus data siswa?',
-            text: "Data yang dihapus nggak bisa dikembalikan, Zil!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                form.submit();
-            }
-        });
+    document.addEventListener('click', function (e) {
+        if (e.target && e.target.classList.contains('btn-delete')) {
+            e.preventDefault();
+            const form = e.target.closest('form');
+            
+            Swal.fire({
+                title: 'Hapus Siswa?',
+                text: "Siswa ini bakal kehilangan datanya, lho!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Pakai native submit biar langsung tembus ke controller
+                    form.submit(); 
+                }
+            });
+        }
     });
 </script>
 @endsection
